@@ -7,40 +7,28 @@ import {
   View,
   Dimensions,
   FlatList,
-  TextInput,
   TouchableOpacity,
 } from "react-native";
-import { HobbySeekerCard } from "./entity";
+import { NavigationContainer } from "@react-navigation/native";
+import FilterScreen from "./filter";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import Icon from "react-native-vector-icons/FontAwesome";
 import { get_profiles } from "./server_interface";
 
-export default function App() {
+const Drawer = createDrawerNavigator();
+
+function HomeScreen({ navigation }) {
   let profileCards = get_profiles();
 
   const [hobbySeekers, setHobbySeekers] = useState([]);
-  const [filteredSeekers, setFilteredSeekers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     console.log("Received profiles:", profileCards.length);
     setHobbySeekers(profileCards);
-    setFilteredSeekers(profileCards);
   }, []);
 
   const cardHeight = 100;
   const cardWidth = Dimensions.get("window").width * 0.9; // 90% of screen width
-
-  const handleSearch = (text) => {
-    setSearchQuery(text);
-    const filtered = hobbySeekers.filter((seeker) =>
-      seeker.name.toLowerCase().includes(text.toLowerCase())
-    );
-    setFilteredSeekers(filtered);
-  };
-
-  const handleApplyFilter = () => {
-    // Implement additional filter logic if needed.
-    console.log("Apply filter clicked");
-  };
 
   function getRenderItem({ item }) {
     return (
@@ -62,27 +50,26 @@ export default function App() {
     );
   }
 
+  const handleApplyFilter = () => {
+    navigation.openDrawer();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Search Bar and Apply Filter Button */}
+      {/* Hobby Name Text */}
       <View style={styles.topBar}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search..."
-          value={searchQuery}
-          onChangeText={handleSearch}
-        />
+        <Text style={styles.hobbyNameText}>__HOBBY NAME__</Text>
         <TouchableOpacity
           style={styles.applyFilterButton}
           onPress={handleApplyFilter}
         >
-          <Text style={styles.buttonText}>Apply Filter</Text>
+          <Icon name="filter" size={20} color="white" />
         </TouchableOpacity>
       </View>
 
       {/* List of Hobby Seekers */}
       <FlatList
-        data={filteredSeekers} // Array of filtered data to render
+        data={hobbySeekers} // Array of filtered data to render
         renderItem={getRenderItem} // Function to render each item
         keyExtractor={(item) => item.id.toString()} // Unique key for each item
         contentContainerStyle={styles.flatListContent} // Center all items
@@ -107,6 +94,20 @@ export default function App() {
   );
 }
 
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Drawer.Navigator
+        drawerPosition="right"
+        drawerContent={(props) => <FilterScreen {...props} />}
+        screenOptions={{ headerShown: false }}
+      >
+        <Drawer.Screen name="Home" component={HomeScreen} />
+      </Drawer.Navigator>
+    </NavigationContainer>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -119,27 +120,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginTop: 16,
   },
-  searchInput: {
+  hobbyNameText: {
     flex: 1,
-    height: 40,
-    borderWidth: 1,
-    borderColor: "red",
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    marginRight: 8,
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "red",
   },
   applyFilterButton: {
     backgroundColor: "red",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    padding: 10,
+    borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
   },
   flatListContent: {
     flexGrow: 1,
