@@ -13,7 +13,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import FilterScreen from "./filter";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { get_profiles } from "./server_interface";
+import { get_profiles } from "./serverInterface";
 
 const Drawer = createDrawerNavigator();
 

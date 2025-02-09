@@ -8,7 +8,8 @@ const hobbySeekerCards = [
   new HobbySeekerCard(5, "Eve", 110, 250, "eve.jpg"),
 ];
 
-export function get_profiles() {
+export function get_profiles(filters) {
+  //send the filters to server and retrieve filtered profiles ....
   return hobbySeekerCards;
 }
 

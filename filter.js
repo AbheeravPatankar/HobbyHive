@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { get_profiles } from "./serverInterface";
 import {
   View,
   Text,
@@ -9,6 +10,38 @@ import {
 } from "react-native";
 
 export default function FilterScreen() {
+  // State variables for each filter
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedAge, setSelectedAge] = useState(null);
+  const [selectedGender, setSelectedGender] = useState(null);
+  const [selectedEducation, setSelectedEducation] = useState(null);
+  const [selectedFollowers, setSelectedFollowers] = useState(null);
+  const [selectedExperience, setSelectedExperience] = useState(null);
+
+  // Function to collect and return all filter values
+  function submitFilters() {
+    const filterValues = {
+      city: selectedCity,
+      state: selectedState,
+      country: selectedCountry,
+      age: selectedAge,
+      gender: selectedGender,
+      education: selectedEducation,
+      followers: selectedFollowers,
+      experience: selectedExperience,
+    };
+
+    console.log("Selected Filters:", filterValues);
+
+    get_profiles(filterValues);
+    console.log(
+      "applying filters and getting new cards from the server......."
+    );
+    return filterValues;
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.text}>Filter Options</Text>
@@ -16,17 +49,31 @@ export default function FilterScreen() {
       {/* Location Box */}
       <View style={styles.box}>
         <Text style={styles.label}>Location</Text>
-        <Picker style={styles.picker} selectedValue={null}>
+        <Picker
+          style={styles.picker}
+          selectedValue={selectedCity}
+          onValueChange={(value) => setSelectedCity(value)}
+        >
           <Picker.Item label="Select City" value={null} />
           <Picker.Item label="City 1" value="city1" />
           <Picker.Item label="City 2" value="city2" />
         </Picker>
-        <Picker style={styles.picker} selectedValue={null}>
+
+        <Picker
+          style={styles.picker}
+          selectedValue={selectedState}
+          onValueChange={(value) => setSelectedState(value)}
+        >
           <Picker.Item label="Select State" value={null} />
           <Picker.Item label="State 1" value="state1" />
           <Picker.Item label="State 2" value="state2" />
         </Picker>
-        <Picker style={styles.picker} selectedValue={null}>
+
+        <Picker
+          style={styles.picker}
+          selectedValue={selectedCountry}
+          onValueChange={(value) => setSelectedCountry(value)}
+        >
           <Picker.Item label="Select Country" value={null} />
           <Picker.Item label="Country 1" value="country1" />
           <Picker.Item label="Country 2" value="country2" />
@@ -36,7 +83,11 @@ export default function FilterScreen() {
       {/* Age Box */}
       <View style={styles.box}>
         <Text style={styles.label}>Age</Text>
-        <Picker style={styles.picker} selectedValue={null}>
+        <Picker
+          style={styles.picker}
+          selectedValue={selectedAge}
+          onValueChange={(value) => setSelectedAge(value)}
+        >
           <Picker.Item label="Select Age Group" value={null} />
           <Picker.Item label="Child (0-18)" value="0-18" />
           <Picker.Item label="Young Adult (19-35)" value="19-35" />
@@ -48,7 +99,11 @@ export default function FilterScreen() {
       {/* Gender Box */}
       <View style={styles.box}>
         <Text style={styles.label}>Gender</Text>
-        <Picker style={styles.picker} selectedValue={null}>
+        <Picker
+          style={styles.picker}
+          selectedValue={selectedGender}
+          onValueChange={(value) => setSelectedGender(value)}
+        >
           <Picker.Item label="Select Gender" value={null} />
           <Picker.Item label="Male" value="male" />
           <Picker.Item label="Female" value="female" />
@@ -60,7 +115,11 @@ export default function FilterScreen() {
       {/* Education Box */}
       <View style={styles.box}>
         <Text style={styles.label}>Education</Text>
-        <Picker style={styles.picker} selectedValue={null}>
+        <Picker
+          style={styles.picker}
+          selectedValue={selectedEducation}
+          onValueChange={(value) => setSelectedEducation(value)}
+        >
           <Picker.Item label="Select Education Level" value={null} />
           <Picker.Item label="High School" value="high-school" />
           <Picker.Item label="Undergraduate" value="undergraduate" />
@@ -72,7 +131,11 @@ export default function FilterScreen() {
       {/* Number of People Following Box */}
       <View style={styles.box}>
         <Text style={styles.label}>Number of People Following</Text>
-        <Picker style={styles.picker} selectedValue={null}>
+        <Picker
+          style={styles.picker}
+          selectedValue={selectedFollowers}
+          onValueChange={(value) => setSelectedFollowers(value)}
+        >
           <Picker.Item label="Select Range" value={null} />
           <Picker.Item label="0-50" value="0-50" />
           <Picker.Item label="51-100" value="51-100" />
@@ -84,7 +147,11 @@ export default function FilterScreen() {
       {/* Experience Level Box */}
       <View style={styles.box}>
         <Text style={styles.label}>Experience Level</Text>
-        <Picker style={styles.picker} selectedValue={null}>
+        <Picker
+          style={styles.picker}
+          selectedValue={selectedExperience}
+          onValueChange={(value) => setSelectedExperience(value)}
+        >
           <Picker.Item label="Select Experience Level" value={null} />
           <Picker.Item label="Beginner (0-2 years)" value="0-2" />
           <Picker.Item label="Intermediate (3-5 years)" value="3-5" />
@@ -94,7 +161,7 @@ export default function FilterScreen() {
       </View>
 
       {/* Apply Button */}
-      <TouchableOpacity style={styles.applyButton}>
+      <TouchableOpacity style={styles.applyButton} onPress={submitFilters}>
         <Text style={styles.applyButtonText}>Apply</Text>
       </TouchableOpacity>
     </ScrollView>
