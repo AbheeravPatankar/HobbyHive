@@ -1,4 +1,5 @@
 import { HobbySeekerCard } from "./entity";
+import axios from "axios";
 
 const hobbySeekerCards = [
   new HobbySeekerCard(1, "Alice", 120, 200, "alice.jpg"),
@@ -9,7 +10,17 @@ const hobbySeekerCards = [
 ];
 
 export function get_profiles(filters) {
-  //send the filters to server and retrieve filtered profiles ....
+  //send the filters to server and retrieve filtered profiles ...
+
+  axios
+    .post("http://localhost:3000/profiles", filters)
+    .then((res) => {
+      console.log(res.data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
   return hobbySeekerCards;
 }
 
