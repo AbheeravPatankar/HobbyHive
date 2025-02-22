@@ -1,218 +1,308 @@
 import React, { useState } from "react";
-import { get_profiles } from "./serverInterface";
 import {
   View,
   Text,
   StyleSheet,
-  Picker,
   ScrollView,
   TouchableOpacity,
+  Platform,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import Slider from "@react-native-community/slider";
+import { get_profiles } from "./serverInterface";
 
-export default function FilterScreen() {
-  // State variables for each filter
-  const [selectedCity, setSelectedCity] = useState(null);
-  const [selectedState, setSelectedState] = useState(null);
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [selectedAge, setSelectedAge] = useState(null);
-  const [selectedGender, setSelectedGender] = useState(null);
-  const [selectedEducation, setSelectedEducation] = useState(null);
-  const [selectedFollowers, setSelectedFollowers] = useState(null);
-  const [selectedExperience, setSelectedExperience] = useState(null);
+// Data constants
+const CITIES = [
+  { label: "Select City", value: "" },
+  { label: "Ahmedabad", value: "ahmedabad" },
+  { label: "Bangalore", value: "bangalore" },
+  { label: "Chennai", value: "chennai" },
+  { label: "Delhi", value: "delhi" },
+  { label: "Hyderabad", value: "hyderabad" },
+  { label: "Kolkata", value: "kolkata" },
+  { label: "Mumbai", value: "mumbai" },
+  { label: "Pune", value: "pune" },
+  { label: "Jaipur", value: "jaipur" },
+  { label: "Lucknow", value: "lucknow" },
+  { label: "Chandigarh", value: "chandigarh" },
+  { label: "Bhopal", value: "bhopal" },
+  { label: "Indore", value: "indore" },
+  { label: "Surat", value: "surat" },
+  { label: "Nagpur", value: "nagpur" },
+  { label: "Patna", value: "patna" },
+  { label: "Visakhapatnam", value: "visakhapatnam" },
+  { label: "Kochi", value: "kochi" },
+  { label: "Coimbatore", value: "coimbatore" },
+];
 
-  // Function to collect and return all filter values
-  function submitFilters() {
-    const filterValues = {
-      city: selectedCity,
-      state: selectedState,
-      country: selectedCountry,
-      age: selectedAge,
-      gender: selectedGender,
-      education: selectedEducation,
-      followers: selectedFollowers,
-      experience: selectedExperience,
-    };
+const STATES = [
+  { label: "Select State", value: "" },
+  { label: "Andhra Pradesh", value: "andhra_pradesh" },
+  { label: "Bihar", value: "bihar" },
+  { label: "Goa", value: "goa" },
+  { label: "Gujarat", value: "gujarat" },
+  { label: "Haryana", value: "haryana" },
+  { label: "Karnataka", value: "karnataka" },
+  { label: "Kerala", value: "kerala" },
+  { label: "Madhya Pradesh", value: "madhya_pradesh" },
+  { label: "Maharashtra", value: "maharashtra" },
+  { label: "Odisha", value: "odisha" },
+  { label: "Punjab", value: "punjab" },
+  { label: "Rajasthan", value: "rajasthan" },
+  { label: "Tamil Nadu", value: "tamil_nadu" },
+  { label: "Telangana", value: "telangana" },
+  { label: "Uttar Pradesh", value: "uttar_pradesh" },
+  { label: "West Bengal", value: "west_bengal" },
+  { label: "Chandigarh", value: "chandigarh" },
+];
 
-    console.log("Selected Filters:", filterValues);
+const AGE_GROUPS = [
+  { label: "Select Age Group", value: null },
+  { label: "Child (0-18)", value: "child" },
+  { label: "Young (19-35)", value: "young" },
+  { label: "Adult (36-50)", value: "adult" },
+  { label: "Senior (51+)", value: "senior" },
+];
 
-    get_profiles(filterValues);
-    console.log(
-      "applying filters and getting new cards from the server......."
-    );
-    return filterValues;
-  }
+const EDUCATION_STATUS = [
+  { label: "Select Current Status", value: null },
+  { label: "High School", value: "high-school" },
+  { label: "Undergraduate", value: "undergraduate" },
+  { label: "Graduate", value: "graduate" },
+  { label: "Doctorate", value: "doctorate" },
+  { label: "Working", value: "working" },
+  { label: "Retired", value: "retired" },
+];
+
+const EXPERIENCE_LEVELS = [
+  { label: "Select Experience Level", value: null },
+  { label: "Beginner (0-2 years)", value: "beginner" },
+  { label: "Intermediate (3-5 years)", value: "intermediate" },
+  { label: "Advanced (6-10 years)", value: "advanced" },
+  { label: "Expert (10+ years)", value: "expert" },
+];
+
+const FilterScreen = () => {
+  // State management with default values
+  const [filters, setFilters] = useState({
+    city: null,
+    state: null,
+    country: "india", // Default to India
+    age_group: null,
+    gender: null,
+    current_status: null,
+    followers: 0,
+    experience: null,
+  });
+
+  // Custom Picker component for reusability
+  const CustomPicker = ({ label, items, selectedValue, onValueChange }) => (
+    <View style={styles.box}>
+      <Text style={styles.label}>{label}</Text>
+      <Picker
+        style={styles.picker}
+        selectedValue={selectedValue}
+        onValueChange={onValueChange}
+      >
+        {items.map((item, index) => (
+          <Picker.Item key={index} label={item.label} value={item.value} />
+        ))}
+      </Picker>
+    </View>
+  );
+
+  // Handle filter submission
+  const handleSubmit = () => {
+    console.log("Selected Filters:", filters);
+    get_profiles(filters);
+    console.log("Fetching filtered profiles from server...");
+  };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.text}>Filter Options</Text>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <Text style={styles.headerText}>Filter Options</Text>
 
-      {/* Location Box */}
-      <View style={styles.box}>
-        <Text style={styles.label}>Location</Text>
-        <Picker
-          style={styles.picker}
-          selectedValue={selectedCity}
-          onValueChange={(value) => setSelectedCity(value)}
-        >
-          <Picker.Item label="Select City" value={null} />
-          <Picker.Item label="City 1" value="city1" />
-          <Picker.Item label="City 2" value="city2" />
-        </Picker>
-
-        <Picker
-          style={styles.picker}
-          selectedValue={selectedState}
-          onValueChange={(value) => setSelectedState(value)}
-        >
-          <Picker.Item label="Select State" value={null} />
-          <Picker.Item label="State 1" value="state1" />
-          <Picker.Item label="State 2" value="state2" />
-        </Picker>
-
-        <Picker
-          style={styles.picker}
-          selectedValue={selectedCountry}
-          onValueChange={(value) => setSelectedCountry(value)}
-        >
-          <Picker.Item label="Select Country" value={null} />
-          <Picker.Item label="Country 1" value="country1" />
-          <Picker.Item label="Country 2" value="country2" />
-        </Picker>
+      {/* Location Section */}
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionTitle}>Location</Text>
+        <CustomPicker
+          label="City"
+          items={CITIES}
+          selectedValue={filters.city}
+          onValueChange={(value) => setFilters({ ...filters, city: value })}
+        />
+        <CustomPicker
+          label="State"
+          items={STATES}
+          selectedValue={filters.state}
+          onValueChange={(value) => setFilters({ ...filters, state: value })}
+        />
       </View>
 
-      {/* Age Box */}
-      <View style={styles.box}>
-        <Text style={styles.label}>Age</Text>
-        <Picker
-          style={styles.picker}
-          selectedValue={selectedAge}
-          onValueChange={(value) => setSelectedAge(value)}
-        >
-          <Picker.Item label="Select Age Group" value={null} />
-          <Picker.Item label="Child (0-18)" value="0-18" />
-          <Picker.Item label="Young Adult (19-35)" value="19-35" />
-          <Picker.Item label="Adult (36-50)" value="36-50" />
-          <Picker.Item label="Senior (51+)" value="51+" />
-        </Picker>
+      {/* Demographics Section */}
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionTitle}>Demographics</Text>
+        <CustomPicker
+          label="Age Group"
+          items={AGE_GROUPS}
+          selectedValue={filters.age_group}
+          onValueChange={(value) =>
+            setFilters({ ...filters, age_group: value })
+          }
+        />
+
+        <View style={styles.box}>
+          <Text style={styles.label}>Gender</Text>
+          <Picker
+            style={styles.picker}
+            selectedValue={filters.gender}
+            onValueChange={(value) => setFilters({ ...filters, gender: value })}
+          >
+            <Picker.Item label="Select Gender" value={null} />
+            <Picker.Item label="Male" value="male" />
+            <Picker.Item label="Female" value="female" />
+          </Picker>
+        </View>
       </View>
 
-      {/* Gender Box */}
-      <View style={styles.box}>
-        <Text style={styles.label}>Gender</Text>
-        <Picker
-          style={styles.picker}
-          selectedValue={selectedGender}
-          onValueChange={(value) => setSelectedGender(value)}
-        >
-          <Picker.Item label="Select Gender" value={null} />
-          <Picker.Item label="Male" value="male" />
-          <Picker.Item label="Female" value="female" />
-          <Picker.Item label="Non-binary" value="non-binary" />
-          <Picker.Item label="Prefer not to say" value="prefer-not-to-say" />
-        </Picker>
+      {/* Professional Info Section */}
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionTitle}>Professional Information</Text>
+        <CustomPicker
+          label="Current Status"
+          items={EDUCATION_STATUS}
+          selectedValue={filters.current_status}
+          onValueChange={(value) =>
+            setFilters({ ...filters, current_status: value })
+          }
+        />
+        <CustomPicker
+          label="Experience Level"
+          items={EXPERIENCE_LEVELS}
+          selectedValue={filters.experience}
+          onValueChange={(value) =>
+            setFilters({ ...filters, experience: value })
+          }
+        />
       </View>
 
-      {/* Education Box */}
+      {/* Followers Section */}
       <View style={styles.box}>
-        <Text style={styles.label}>Education</Text>
-        <Picker
-          style={styles.picker}
-          selectedValue={selectedEducation}
-          onValueChange={(value) => setSelectedEducation(value)}
-        >
-          <Picker.Item label="Select Education Level" value={null} />
-          <Picker.Item label="High School" value="high-school" />
-          <Picker.Item label="Undergraduate" value="undergraduate" />
-          <Picker.Item label="Graduate" value="graduate" />
-          <Picker.Item label="Doctorate" value="doctorate" />
-        </Picker>
-      </View>
-
-      {/* Number of People Following Box */}
-      <View style={styles.box}>
-        <Text style={styles.label}>Number of People Following</Text>
-        <Picker
-          style={styles.picker}
-          selectedValue={selectedFollowers}
-          onValueChange={(value) => setSelectedFollowers(value)}
-        >
-          <Picker.Item label="Select Range" value={null} />
-          <Picker.Item label="0-50" value="0-50" />
-          <Picker.Item label="51-100" value="51-100" />
-          <Picker.Item label="101-500" value="101-500" />
-          <Picker.Item label="501+" value="501+" />
-        </Picker>
-      </View>
-
-      {/* Experience Level Box */}
-      <View style={styles.box}>
-        <Text style={styles.label}>Experience Level</Text>
-        <Picker
-          style={styles.picker}
-          selectedValue={selectedExperience}
-          onValueChange={(value) => setSelectedExperience(value)}
-        >
-          <Picker.Item label="Select Experience Level" value={null} />
-          <Picker.Item label="Beginner (0-2 years)" value="0-2" />
-          <Picker.Item label="Intermediate (3-5 years)" value="3-5" />
-          <Picker.Item label="Advanced (6-10 years)" value="6-10" />
-          <Picker.Item label="Expert (10+ years)" value="10+" />
-        </Picker>
+        <Text style={styles.label}>
+          Number of Followers: {filters.followers}
+        </Text>
+        <Slider
+          style={styles.slider}
+          minimumValue={0}
+          maximumValue={1000}
+          step={1}
+          value={filters.followers}
+          onValueChange={(value) =>
+            setFilters({ ...filters, followers: value })
+          }
+          minimumTrackTintColor="#FF0000"
+          maximumTrackTintColor="#D3D3D3"
+          thumbTintColor="#FF0000"
+        />
       </View>
 
       {/* Apply Button */}
-      <TouchableOpacity style={styles.applyButton} onPress={submitFilters}>
-        <Text style={styles.applyButtonText}>Apply</Text>
+      <TouchableOpacity
+        style={styles.applyButton}
+        onPress={handleSubmit}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.applyButtonText}>Apply Filters</Text>
       </TouchableOpacity>
     </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
     paddingVertical: 20,
-    backgroundColor: "white",
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
   },
-  text: {
-    fontSize: 18,
-    color: "black",
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#000000",
     marginBottom: 20,
+    textAlign: "center",
+  },
+  sectionContainer: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333333",
+    marginBottom: 10,
   },
   box: {
-    width: "80%",
     padding: 16,
     borderWidth: 1,
-    borderColor: "black",
+    borderColor: "#E0E0E0",
     borderRadius: 10,
-    backgroundColor: "white",
-    marginBottom: 20,
+    backgroundColor: "#FFFFFF",
+    marginBottom: 15,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   label: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "red",
+    fontWeight: "600",
+    color: "#FF0000",
     marginBottom: 8,
   },
   picker: {
     height: 40,
     width: "100%",
-    marginBottom: 12,
-    backgroundColor: "white",
-    color: "black",
+    marginBottom: 8,
+    color: "#000000",
+  },
+  slider: {
+    width: "100%",
+    height: 40,
   },
   applyButton: {
-    backgroundColor: "red",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: "#FF0000",
+    paddingVertical: 15,
     borderRadius: 10,
     marginTop: 20,
+    marginBottom: 30,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   applyButtonText: {
-    color: "white",
-    fontSize: 16,
+    color: "#FFFFFF",
+    fontSize: 18,
     fontWeight: "bold",
+    textAlign: "center",
   },
 });
+
+export default FilterScreen;
