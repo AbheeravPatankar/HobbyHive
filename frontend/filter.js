@@ -9,6 +9,9 @@ import {
   Modal,
   FlatList,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import Slider from "@react-native-community/slider";
+import { get_profiles } from "./serverInterface";
 
 export default function FilterScreen() {
   // State variables for each filter
@@ -99,7 +102,10 @@ export default function FilterScreen() {
 
   function renderFilter(label, selectedValue, setter) {
     return (
-      <TouchableOpacity style={styles.filterBox} onPress={() => openModal(label.toLowerCase(), setter)}>
+      <TouchableOpacity
+        style={styles.filterBox}
+        onPress={() => openModal(label.toLowerCase(), setter)}
+      >
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.selectedValue}>{selectedValue || "Select"}</Text>
       </TouchableOpacity>
@@ -114,7 +120,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 20,
     backgroundColor: "#f8f9fa",
-    marginTop: 50
+    marginTop: 50,
   },
   headerText: {
     fontSize: 22,

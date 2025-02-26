@@ -22,7 +22,6 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { get_profiles } from "./serverInterface";
 import { createStackNavigator } from "@react-navigation/stack";
 
-
 const Drawer = createDrawerNavigator();
 const loggedIn = 0;
 
@@ -119,7 +118,8 @@ export default function App() {
   const [showSignup, setShowSignup] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
   const [hasSelectedHobbies, setHasSelectedHobbies] = useState([]);
-  const [hasCompletedHobbyDetails, setHasCompletedHobbyDetails] = useState(false);
+  const [hasCompletedHobbyDetails, setHasCompletedHobbyDetails] =
+    useState(false);
 
   return (
     <NavigationContainer>
@@ -132,20 +132,34 @@ export default function App() {
               ) : (
                 <Stack.Screen name="HobbyDetails">
                   {(props) => (
-                    <HobbyDetailsScreen {...props} hobbies={hasSelectedHobbies} onComplete={() => setHasCompletedHobbyDetails(true)} />
+                    <HobbyDetailsScreen
+                      {...props}
+                      hobbies={hasSelectedHobbies}
+                      onComplete={() => setHasCompletedHobbyDetails(true)}
+                    />
                   )}
                 </Stack.Screen>
               )
             ) : (
               <Stack.Screen name="HobbyScreen">
                 {(props) => (
-                  <HobbyScreen {...props} onHobbiesSelected={(hobbies) => setHasSelectedHobbies(hobbies)} />
+                  <HobbyScreen
+                    {...props}
+                    onHobbiesSelected={(hobbies) =>
+                      setHasSelectedHobbies(hobbies)
+                    }
+                  />
                 )}
               </Stack.Screen>
             )
           ) : (
             <Stack.Screen name="ProfileInfo">
-              {(props) => <ProfileInfo {...props} onProfileComplete={() => setIsProfileComplete(true)} />}
+              {(props) => (
+                <ProfileInfo
+                  {...props}
+                  onProfileComplete={() => setIsProfileComplete(true)}
+                />
+              )}
             </Stack.Screen>
           )
         ) : showSignup ? (
