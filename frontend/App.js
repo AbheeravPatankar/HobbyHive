@@ -10,20 +10,27 @@ import {
   TouchableOpacity,
 } from "react-native";
 
+
 import LoginScreen from "./LoginScreen";
 import SignupScreen from "./SignupScreen";
 import HobbyScreen from "./HobbyScreen";
 import ProfileInfo from "./ProfileInfo";
 import HobbyDetailsScreen from "./HobbyDetailsScreen";
+
 import { NavigationContainer } from "@react-navigation/native";
 import FilterScreen from "./filter";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { get_profiles } from "./serverInterface";
+
+
+const Drawer = createDrawerNavigator();
+
 import { createStackNavigator } from "@react-navigation/stack";
 
 const Drawer = createDrawerNavigator();
 const loggedIn = 0;
+
 
 function HomeScreen({ navigation }) {
   let profileCards = get_profiles();
@@ -36,7 +43,8 @@ function HomeScreen({ navigation }) {
   }, []);
 
   const cardHeight = 100;
-  const cardWidth = Dimensions.get("window").width * 0.9;
+  const cardWidth = Dimensions.get("window").width * 0.9; // 90% of screen width
+
 
   function getRenderItem({ item }) {
     return (
@@ -64,12 +72,14 @@ function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+
       <View style={styles.topBar}>
         <Text style={styles.hobbyNameText}>HobbyHive</Text>
         <TouchableOpacity
           style={styles.applyFilterButton}
           onPress={handleApplyFilter}
         >
+
           <Icon name="filter" size={20} color="#1a1100" />
         </TouchableOpacity>
       </View>
@@ -98,6 +108,7 @@ function HomeScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
 
 function HomeDrawer() {
   return (
@@ -194,6 +205,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+
     backgroundColor: "#ffedcc",
   },
   topBar: {
@@ -208,6 +220,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 18,
     fontWeight: "bold",
+
     color: "#1a1100",
   },
   applyFilterButton: {
@@ -216,6 +229,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
+
     borderWidth: 2,
     borderColor: "#1a1100",
   },
@@ -227,6 +241,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "center",
+
     borderWidth: 2,
     borderColor: "#1a1100",
     borderRadius: 10,
@@ -245,22 +260,26 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     borderWidth: 2,
+
     borderColor: "#1a1100",
   },
   infoContainer: {
     flex: 1,
     paddingLeft: 16,
+
     backgroundColor: "#ffedcc",
     paddingVertical: 16,
   },
   name: {
     fontSize: 18,
     fontWeight: "bold",
+
     color: "#1a1100",
     marginBottom: 4,
   },
   details: {
     fontSize: 14,
+
     color: "#1a1100",
   },
   bottomTabPanel: {

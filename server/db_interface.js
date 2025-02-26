@@ -47,6 +47,7 @@ function db_query(query) {
   });
 }
 
+
 function get_elements_from_db(filters) {
   let baseQuery = "SELECT * FROM profiles";
   let conditions = [];
