@@ -24,7 +24,6 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { get_profiles } from "./serverInterface";
 
 
-const Drawer = createDrawerNavigator();
 
 import { createStackNavigator } from "@react-navigation/stack";
 
