@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, ScrollView } from "react-native";
 
 const hobbiesData = {
   "Creative Arts": ["Painting", "Drawing", "Sculpting", "Photography", "Digital Art"],
@@ -16,8 +16,20 @@ const hobbiesData = {
 };
 
 const HobbyScreen = ({ onHobbiesSelected }) => {
+  const [user, setUser] = useState(null);
   const [selectedHobbies, setSelectedHobbies] = useState([]);
   const [expandedCategory, setExpandedCategory] = useState(null);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/me", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch(err => console.log(err));
+  }, []);
 
   const toggleHobby = (hobby) => {
     setSelectedHobbies((prev) =>
@@ -26,41 +38,46 @@ const HobbyScreen = ({ onHobbiesSelected }) => {
   };
 
   const handleSubmit = async () => {
-    /*
     try {
-      await fetch("https://your-api.com/saveHobbies", {
+      const response = await fetch("http://localhost:3000/saveHobbies", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hobbies: selectedHobbies }),
+        credentials: "include",
+        body: JSON.stringify({ email: user.email, hobbies: selectedHobbies }),
       });
-      alert("Hobbies saved successfully!");
-      onProfileComplete();
+
+      const data = await response.json();
+      alert(data.message);
+      onHobbiesSelected(selectedHobbies);
     } catch (error) {
       console.error("Error saving hobbies:", error);
     }
-    */
-   onHobbiesSelected(selectedHobbies);
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Select Your Hobbies</Text>
-      <FlatList
-        data={Object.keys(hobbiesData)}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => (
-          <View>
-            <TouchableOpacity style={styles.category} onPress={() => setExpandedCategory(item)}>
-              <Text style={styles.categoryText}>{item}</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Select Your Hobbies</Text>
+        {Object.keys(hobbiesData).map((category) => (
+          <View key={category}>
+            <TouchableOpacity
+              style={styles.category}
+              onPress={() => setExpandedCategory(expandedCategory === category ? null : category)}
+            >
+              <Text style={styles.categoryText}>{category}</Text>
             </TouchableOpacity>
-            {expandedCategory === item && (
+            {expandedCategory === category && (
               <FlatList
-                data={hobbiesData[item]}
+                data={hobbiesData[category]}
                 keyExtractor={(hobby) => hobby}
+                nestedScrollEnabled
                 renderItem={({ item: hobby }) => (
                   <TouchableOpacity onPress={() => toggleHobby(hobby)}>
                     <Text
-                      style={[styles.hobbyText, { color: selectedHobbies.includes(hobby) ? "#ffdd99" : "#1a1100" }]}
+                      style={[
+                        styles.hobbyText,
+                        { color: selectedHobbies.includes(hobby) ? "#ffdd99" : "#1a1100" },
+                      ]}
                     >
                       {hobby}
                     </Text>
@@ -69,21 +86,24 @@ const HobbyScreen = ({ onHobbiesSelected }) => {
               />
             )}
           </View>
-        )}
-      />
-      <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
-        <Text style={styles.saveButtonText}>Save</Text>
-      </TouchableOpacity>
-    </View>
+        ))}
+        <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
+          <Text style={styles.saveButtonText}>Save</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
     padding: 20,
     backgroundColor: "#ffedcc",
-    paddingTop: 20
+    paddingTop: 20,
   },
   title: {
     fontSize: 24,
@@ -98,6 +118,8 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     backgroundColor: "#ffdd99",
     borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#1a1100",
   },
   categoryText: {
     fontSize: 18,
@@ -108,6 +130,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 20,
     paddingVertical: 5,
+    color: "#1a1100",
+    backgroundColor: "#ffffff",
+    padding: 5,
+    borderRadius: 5,
   },
   saveButton: {
     backgroundColor: "#ffdd99",
@@ -122,23 +148,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#1a1100",
-  },
-  category: {
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor: "#ffdd99",
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "#1a1100",
-  },
-  hobbyText: {
-    fontSize: 16,
-    marginLeft: 20,
-    paddingVertical: 5,
-    color: "#1a1100",
-    backgroundColor: "#ffffff",
-    padding: 5,
-    borderRadius: 5,
   },
 });
 

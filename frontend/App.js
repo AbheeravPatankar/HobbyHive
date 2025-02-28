@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
+import HomeScreen from "./HomeScreen";
 import LoginScreen from "./LoginScreen";
 import SignupScreen from "./SignupScreen";
 import HobbyScreen from "./HobbyScreen";
@@ -25,80 +26,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 const Drawer = createDrawerNavigator();
 const loggedIn = 0;
-
-function HomeScreen({ navigation }) {
-  let profileCards = get_profiles();
-
-  const [hobbySeekers, setHobbySeekers] = useState([]);
-
-  useEffect(() => {
-    console.log("Received profiles:", profileCards.length);
-    setHobbySeekers(profileCards);
-  }, []);
-
-  const cardHeight = 100;
-  const cardWidth = Dimensions.get("window").width * 0.9;
-
-  function getRenderItem({ item }) {
-    return (
-      <View style={[styles.card, { height: cardHeight, width: cardWidth }]}>
-        <View style={styles.imageContainer}>
-          <Image
-            style={styles.image}
-            source={require("./assets/my_photo.png")}
-          />
-        </View>
-
-        <View style={styles.infoContainer}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.details}>Following: {item.following}</Text>
-          <Text style={styles.details}>Followers: {item.followers}</Text>
-          <Text style={styles.details}>Location: Pune, Maharashtra, India</Text>
-        </View>
-      </View>
-    );
-  }
-
-  const handleApplyFilter = () => {
-    navigation.openDrawer();
-  };
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.topBar}>
-        <Text style={styles.hobbyNameText}>HobbyHive</Text>
-        <TouchableOpacity
-          style={styles.applyFilterButton}
-          onPress={handleApplyFilter}
-        >
-          <Icon name="filter" size={20} color="#1a1100" />
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={hobbySeekers}
-        renderItem={getRenderItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.flatListContent}
-      />
-
-      <View style={styles.bottomTabPanel}>
-        <View style={styles.tab}>
-          <Text style={styles.tabText}>Tab 1</Text>
-        </View>
-        <View style={styles.tab}>
-          <Text style={styles.tabText}>Tab 2</Text>
-        </View>
-        <View style={styles.tab}>
-          <Text style={styles.tabText}>Tab 3</Text>
-        </View>
-        <View style={styles.tab}>
-          <Text style={styles.tabText}>Tab 4</Text>
-        </View>
-      </View>
-    </SafeAreaView>
-  );
-}
 
 function HomeDrawer() {
   return (
