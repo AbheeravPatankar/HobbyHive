@@ -10,16 +10,18 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import FilterScreen from "./filter";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/FontAwesome";
+import FilterScreen from "./filter";
+import HobbyRiskSurveyScreen from "./HobbyRiskSurveyScreen";
 import { get_profiles } from "./serverInterface";
 
 const Drawer = createDrawerNavigator();
+const Tab = createBottomTabNavigator();
 
 function HomeScreen({ navigation }) {
   let profileCards = get_profiles();
-
   const [hobbySeekers, setHobbySeekers] = useState([]);
 
   useEffect(() => {
@@ -50,10 +52,6 @@ function HomeScreen({ navigation }) {
     );
   }
 
-  const handleApplyFilter = () => {
-    navigation.openDrawer();
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Hobby Name Text */}
@@ -61,7 +59,7 @@ function HomeScreen({ navigation }) {
         <Text style={styles.hobbyNameText}>__HOBBY NAME__</Text>
         <TouchableOpacity
           style={styles.applyFilterButton}
-          onPress={handleApplyFilter}
+          onPress={() => navigation.openDrawer()}
         >
           <Icon name="filter" size={20} color="white" />
         </TouchableOpacity>
@@ -69,31 +67,26 @@ function HomeScreen({ navigation }) {
 
       {/* List of Hobby Seekers */}
       <FlatList
-        data={hobbySeekers} // Array of filtered data to render
-        renderItem={getRenderItem} // Function to render each item
-        keyExtractor={(item) => item.id.toString()} // Unique key for each item
-        contentContainerStyle={styles.flatListContent} // Center all items
+        data={hobbySeekers}
+        renderItem={getRenderItem}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.flatListContent}
       />
-
-      {/* Bottom Tab Panel */}
-      <View style={styles.bottomTabPanel}>
-        <View style={styles.tab}>
-          <Text style={styles.tabText}>Tab 1</Text>
-        </View>
-        <View style={styles.tab}>
-          <Text style={styles.tabText}>Tab 2</Text>
-        </View>
-        <View style={styles.tab}>
-          <Text style={styles.tabText}>Tab 3</Text>
-        </View>
-        <View style={styles.tab}>
-          <Text style={styles.tabText}>Tab 4</Text>
-        </View>
-      </View>
     </SafeAreaView>
   );
 }
 
+// ✅ Tab Navigator (Inside Drawer)
+function TabNavigator() {
+  return (
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="HobbySurvey" component={HobbyRiskSurveyScreen} />
+    </Tab.Navigator>
+  );
+}
+
+// ✅ Drawer Navigator (Contains Tabs)
 export default function App() {
   return (
     <NavigationContainer>
@@ -102,7 +95,7 @@ export default function App() {
         drawerContent={(props) => <FilterScreen {...props} />}
         screenOptions={{ headerShown: false }}
       >
-        <Drawer.Screen name="Home" component={HomeScreen} />
+        <Drawer.Screen name="HomeTabs" component={TabNavigator} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
@@ -177,25 +170,5 @@ const styles = StyleSheet.create({
   details: {
     fontSize: 14,
     color: "gray",
-  },
-  bottomTabPanel: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    height: 70,
-    flexDirection: "row",
-    backgroundColor: "red",
-    justifyContent: "space-around",
-    alignItems: "center",
-  },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  tabText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });

@@ -24,7 +24,17 @@ export function get_profiles(filters) {
   return hobbySeekerCards;
 }
 
-function addHobbySeekerCard(list, name, following, followers, profilePhoto) {
-  const newCard = new HobbySeekerCard(name, following, followers, profilePhoto);
-  list.push(newCard);
+export async function getHobbiesfromServer() {
+  //make the call to the server to get the list of hobbies using the profile id
+  arr = [];
+  const res = await axios.get("http://localhost:3000/hobby/all");
+  return Array.isArray(res.data) ? res.data : Object.values(res.data);
+}
+
+export async function getHobbyRiskDataFromServer(hobby) {
+  //make the API call to the server which gives the risk data for that particular hobby
+  arr = [];
+  res = await axios.get("http://localhost:3000/hobby/riskData/" + hobby);
+  console.log("result : " + res.data);
+  return Array.isArray(res.data) ? res.data : Object.values(res.data);
 }

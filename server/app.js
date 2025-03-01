@@ -26,3 +26,22 @@ app.post("/profiles", (req, res) => {
   result = db_query(query);
   res.json(result);
 });
+
+app.get("/hobby/all", (req, res) => {
+  console.log("serving the request at route /hobby/all....");
+
+  //query the data base to get all the hobbies
+  result = db_query("select hobby_name from Sample.hobbies");
+  hobbies = ["select value ", "tennis", "cricket", "programming"];
+  res.json(hobbies);
+});
+
+app.get("/hobby/riskData/:hobby_name", (req, res) => {
+  const hobby = req.params.hobby_name; // Extract query param
+  console.log("Serving request for hobby:", hobby);
+
+  if (hobby === "tennis") return res.json([2, 3.4, 3.8, 2.1, 1, 1.9]);
+  if (hobby === "cricket") return res.json([1.8, 2.9, 3.5, 2.4, 0.9, 2.1]);
+  if (hobby === "programming") return res.json([3.0, 4.2, 3.6, 1.7, 1.1, 2.5]);
+  return res.json([]);
+});
