@@ -37,7 +37,7 @@ const HobbyRiskSurveyScreen = () => {
   };
 
   const hobbyRiskData = {
-    labels: ["A", "B", "C", "D", "E", "F", "G"],
+    labels: ["A", "B", "C", "D", "E"],
     datasets: [
       {
         data: hobbyData,
