@@ -29,8 +29,7 @@ app.use(session({
   secret: "secret_key",
   resave: true,
   saveUninitialized: true,
-  store: sessionStore,
-  cookie: {secure: false, httpOnly: true, sameSite: "None"},
+  cookie: {secure: process.env.NODE_ENV === "production", httpOnly: true, sameSite:"lax",maxAge: 7 * 24 * 60 * 60 * 1000 },
 }));
 
 
@@ -54,6 +53,28 @@ app.get("/me", (req, res) => {
 
   res.json({user: req.session.user});
 });
+
+app.post("/login", (req, res) => {
+  const {email, password} = req.body;
+
+  const checkEmailQuery = "SELECT * FROM users WHERE email = ?";
+  db.query(checkEmailQuery, [email], (err, results) => {
+    if (err) return res.status(500).json({error:"Database error. 1"});
+    console.log(results);
+
+    if (results.length === 0) {
+      return res.status(401).json({ error: "Invalid login." });
+    }
+
+    if (results[0].password != password) {
+      return res.status(401).json({ error: "wrong password." });
+    }
+    
+
+    req.session.user = {email:  email};
+    return res.status(200).json({message: "invalid login"})
+  })
+})
 
 app.post("/signup", (req, res) => {
   const {name, email, password} = req.body;
@@ -83,17 +104,38 @@ app.post("/signup", (req, res) => {
 app.post("/saveUserDetails", (req, res) => {
   const { city, state, country, dob, phone, education, gender, email} = req.body;
 
+  const calculate_age = (dob) => {
+    var today = new Date();
+    var birthDate = new Date(dob);  
+    var age_now = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) 
+    {
+        age_now--;
+    }
+    console.log(age_now);
+    return age_now;
+  }
+
+  var age_group = null;
+  const age = calculate_age(dob);
+  if (age < 20) age_group = "0-19";
+  else if (age < 36) age_group = "19-35";
+  else if (age < 51) age_group = "36-50";
+  else age_group = "51+"
+
+
   if (!email) {
     return res.status(400).json({ error: "Email is required." });
   }
 
   const query = `
     UPDATE users 
-    SET city = ?, state = ?, country = ?, dob = ?, phone = ?, education = ?, gender = ?
+    SET city = ?, state = ?, country = ?, dob = ?, phone = ?, education = ?, gender = ?, age_group = ?
     WHERE email = ?;
   `;
 
-  db.query(query, [city, state, country, dob, phone, education, gender, email], (err) => {
+  db.query(query, [city, state, country, dob, phone, education, gender, age_group, email], (err) => {
     if (err)  {
       console.error("Database Error:", err);
       return res.status(500).json({ error: "hehe" });
@@ -149,7 +191,7 @@ app.post("/saveHobbyDetails", (req, res) => {
 });
 
 app.get("/profiles", (req, res) => {
-  const query = "SELECT id, name, followers, city, state, country FROM users";
+  const query = "SELECT id, name, followers, city, state, country, age_group, education, gender FROM users";
 
   db.query(query, (err, results) => {
     if (err) {
@@ -159,6 +201,32 @@ app.get("/profiles", (req, res) => {
     res.json(results);
   });
 });
+
+app.get("/gethobbies", (req, res) => {
+  const query = "SELECT hobby from hobbies";
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Error fetching hobbies: ", err);
+      return res.status(500).json({error: "database error"});
+    }
+    res.json(results);
+  })
+})
+
+app.post("/gethobbyrisk", (req, res) => {
+  const {hobby} = req.body;
+
+  const query = "SELECT fin, func, phys, psych, social, sat, time from hobbies WHERE hobby = ?";
+  db.query(query, [hobby], (err, results) => {
+    if (err) {
+      console.error("Error fetching risks: ", err);
+      return res.status(500).json({error: "database error"});
+    }
+
+    res.json(results);
+  })
+})
 
 app.listen(3000, ()=> {
   console.log("Server listening on port 3000");

@@ -1,3 +1,4 @@
+import { DrawerActions, NavigationContainer } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import {
     StyleSheet,
@@ -13,8 +14,9 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 
 
-function HomeScreen({ navigation }) {  
+function HomeScreen({ navigation, route }) {  
     const [hobbySeekers, setHobbySeekers] = useState([]);
+    const [filteredSeekers, setFilteredSeekers] = useState([]);
   
     useEffect(() => {
         // Fetch profiles when component mounts
@@ -33,6 +35,30 @@ function HomeScreen({ navigation }) {
     
         fetchProfiles();
       }, []); 
+
+      useEffect(() => {
+        if (route.params?.filters) {
+          const filters = route.params.filters;
+          console.log("Applied Filters:", filters);
+  
+          // Apply filters
+          const filtered = hobbySeekers.filter(profile => {
+            return (
+              (!filters.city || profile.city === filters.city) &&
+              (!filters.state || profile.state === filters.state) &&
+              (!filters.country || profile.country === filters.country) &&
+              (!filters.age || profile.age_group === filters.age) &&
+              (!filters.gender || profile.gender === filters.gender) &&
+              (!filters.education || profile.education === filters.education) &&
+              (!filters.followers || profile.followers === filters.followers)
+            );
+          });
+  
+          setFilteredSeekers(filtered);
+        } else {
+          setFilteredSeekers(hobbySeekers); // If no filters, show all
+        }
+      }, [route.params, hobbySeekers]); 
 
       
   
@@ -58,13 +84,16 @@ function HomeScreen({ navigation }) {
         </View>
       );
     }
+
+
   
     const handleApplyFilter = () => {
-      navigation.openDrawer();
+      navigation.dispatch(DrawerActions.openDrawer());;
     };
-  
-    return (
-      <SafeAreaView style={styles.container}>
+
+    if (filteredSeekers.length == 0) {
+      return (
+        <SafeAreaView style={styles.container}>
         <View style={styles.topBar}>
           <Text style={styles.hobbyNameText}>HobbyHive</Text>
           <TouchableOpacity
@@ -75,12 +104,7 @@ function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
   
-        <FlatList
-          data={hobbySeekers}
-          renderItem={getRenderItem}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.flatListContent}
-        />
+        <Text style={styles.bigText}>No Such Users</Text>
   
         <View style={styles.bottomTabPanel}>
           <View style={styles.tab}>
@@ -96,6 +120,28 @@ function HomeScreen({ navigation }) {
             <Text style={styles.tabText}>Tab 4</Text>
           </View>
         </View>
+      </SafeAreaView>
+      );
+    } 
+  
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.topBar}>
+          <Text style={styles.hobbyNameText}>HobbyHive</Text>
+          <TouchableOpacity
+            style={styles.applyFilterButton}
+            onPress={handleApplyFilter}
+          >
+            <Icon name="filter" size={20} color="#1a1100" />
+          </TouchableOpacity>
+        </View>
+  
+        <FlatList
+          data={filteredSeekers}
+          renderItem={getRenderItem}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.flatListContent}
+        />
       </SafeAreaView>
     );
   }
@@ -194,6 +240,11 @@ function HomeScreen({ navigation }) {
       fontSize: 16,
       fontWeight: "bold",
     },
+    bigText: {
+      color: "#000000",
+      fontSize: 30,
+      fontWeight: "bold",
+    }
   });
 
 export default HomeScreen;

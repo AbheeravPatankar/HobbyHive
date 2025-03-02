@@ -1,14 +1,9 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  Image,
-  SafeAreaView,
-  View,
-  Dimensions,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
+import React, { useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+
 
 import HomeScreen from "./HomeScreen";
 import LoginScreen from "./LoginScreen";
@@ -16,16 +11,21 @@ import SignupScreen from "./SignupScreen";
 import HobbyScreen from "./HobbyScreen";
 import ProfileInfo from "./ProfileInfo";
 import HobbyDetailsScreen from "./HobbyDetailsScreen";
-import { NavigationContainer } from "@react-navigation/native";
 import FilterScreen from "./filter";
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { get_profiles } from "./serverInterface";
-import { createStackNavigator } from "@react-navigation/stack";
+import HobbyRiskSurveyScreen from "./HobbyRiskSurveyScreen";
 
-
+const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
-const loggedIn = 0;
+const Tab = createBottomTabNavigator();
+
+function TabNavigator() {
+  return (
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="HobbySurvey" component={HobbyRiskSurveyScreen} />
+    </Tab.Navigator>
+  );
+}
 
 function HomeDrawer() {
   return (
@@ -34,168 +34,73 @@ function HomeDrawer() {
       drawerContent={(props) => <FilterScreen {...props} />}
       screenOptions={{ headerShown: false }}
     >
-      <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Screen name="HomeTabs" component={TabNavigator} />
     </Drawer.Navigator>
   );
 }
 
-const Stack = createStackNavigator();
-
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showSignup, setShowSignup] = useState(false);
-  const [isProfileComplete, setIsProfileComplete] = useState(false);
-  const [hasSelectedHobbies, setHasSelectedHobbies] = useState([]);
-  const [hasCompletedHobbyDetails, setHasCompletedHobbyDetails] = useState(false);
 
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isLoggedIn ? (
-          isProfileComplete ? (
-            hasSelectedHobbies.length > 0 ? (
-              hasCompletedHobbyDetails ? (
-                <Stack.Screen name="HomeDrawer" component={HomeDrawer} />
-              ) : (
-                <Stack.Screen name="HobbyDetails">
-                  {(props) => (
-                    <HobbyDetailsScreen {...props} hobbies={hasSelectedHobbies} onComplete={() => setHasCompletedHobbyDetails(true)} />
-                  )}
-                </Stack.Screen>
-              )
-            ) : (
-              <Stack.Screen name="HobbyScreen">
-                {(props) => (
-                  <HobbyScreen {...props} onHobbiesSelected={(hobbies) => setHasSelectedHobbies(hobbies)} />
-                )}
-              </Stack.Screen>
-            )
-          ) : (
-            <Stack.Screen name="ProfileInfo">
-              {(props) => <ProfileInfo {...props} onProfileComplete={() => setIsProfileComplete(true)} />}
+        {!isLoggedIn ? (
+          <>
+            <Stack.Screen name="Login">
+              {(props) => (
+                <LoginScreen
+                  {...props}
+                  onLoginSuccess={() => {
+                    setIsLoggedIn(true);
+                    props.navigation.replace("HomeDrawer"); 
+                  }}
+                  onGoToSignup={() => props.navigation.navigate("Signup")}
+                />
+              )}
             </Stack.Screen>
-          )
-        ) : showSignup ? (
-          <Stack.Screen name="Signup">
-            {(props) => (
-              <SignupScreen
-                {...props}
-                onSignupSuccess={() => {
-                  setIsLoggedIn(true);
-                  setIsProfileComplete(false);
-                }}
-                onGoToLogin={() => setShowSignup(false)}
-              />
-            )}
-          </Stack.Screen>
-        ) : (
-          <Stack.Screen name="Login">
-            {(props) => (
-              <LoginScreen
-                {...props}
-                onLoginSuccess={() => setIsLoggedIn(true)}
-                onGoToSignup={() => setShowSignup(true)}
-              />
-            )}
-          </Stack.Screen>
-        )}
+            <Stack.Screen name="Signup">
+              {(props) => (
+                <SignupScreen
+                  {...props}
+                  onSignupSuccess={() => props.navigation.navigate("ProfileInfo")}
+                />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="ProfileInfo">
+              {(props) => (
+                <ProfileInfo
+                  {...props}
+                  onProfileComplete={() => props.navigation.navigate("HobbyScreen")}
+                />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="HobbyScreen">
+              {(props) => (
+                <HobbyScreen
+                  {...props}
+                  onHobbiesSelected={(hobbies) =>
+                    props.navigation.navigate("HobbyDetails", { hobbies })
+                  }
+                />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="HobbyDetails">
+              {(props) => (
+                <HobbyDetailsScreen
+                  {...props}
+                  hobbies={props.route.params?.hobbies || []}
+                  onComplete={() => {
+                    setIsLoggedIn(true);
+                    props.navigation.replace("HomeDrawer"); e
+                  }}
+                />
+              )}
+            </Stack.Screen>
+          </>
+        ) : null}
+        <Stack.Screen name="HomeDrawer" component={HomeDrawer} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ffedcc",
-  },
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    marginTop: 16,
-  },
-  hobbyNameText: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1a1100",
-  },
-  applyFilterButton: {
-    backgroundColor: "#ffdd99",
-    padding: 10,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#1a1100",
-  },
-  flatListContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#1a1100",
-    borderRadius: 10,
-    overflow: "hidden",
-    marginVertical: 8,
-    backgroundColor: "#ffdd99",
-  },
-  imageContainer: {
-    backgroundColor: "#ffdd99",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 10,
-  },
-  image: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: "#1a1100",
-  },
-  infoContainer: {
-    flex: 1,
-    paddingLeft: 16,
-    backgroundColor: "#ffedcc",
-    paddingVertical: 16,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1a1100",
-    marginBottom: 4,
-  },
-  details: {
-    fontSize: 14,
-    color: "#1a1100",
-  },
-  bottomTabPanel: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    height: 70,
-    flexDirection: "row",
-    backgroundColor: "#ffdd99",
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderTopWidth: 2,
-    borderColor: "#1a1100",
-  },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  tabText: {
-    color: "#1a1100",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});

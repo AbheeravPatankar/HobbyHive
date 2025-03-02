@@ -6,6 +6,11 @@ function SignupScreen({ onSignupSuccess, onGoToLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
   // LOGIC FOR SIGNUP HANDLING
   const handleSignup = async () => {
     if (!name || !email || !password) {
@@ -13,7 +18,15 @@ function SignupScreen({ onSignupSuccess, onGoToLogin }) {
       return;
     }
 
-  
+    if (!validateEmail(email)) {
+      alert("Invalid email");
+      return;
+    }
+    if (password.length < 6) {
+      alert("password too short");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:3000/signup", {
         method: "POST",

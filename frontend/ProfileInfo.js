@@ -1,5 +1,28 @@
-import React, { useEffect,useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import { Picker } from "@react-native-picker/picker"; 
+
+const cities = [
+  "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", 
+  "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow", 
+  "Chandigarh", "Bhopal", "Indore", "Patna", "Surat", 
+  "Nagpur", "Coimbatore", "Kochi", "Guwahati", "Visakhapatnam"
+];
+
+const states =  [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", 
+  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", 
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", 
+  "Uttar Pradesh", "Uttarakhand", "West Bengal"
+];
+
+const countries = ["USA", "Canada", "UK", "India", "Australia", "Switzerland"];
+
+const educations = ["High School", "Undergraduate", "Graduate", "Working", "Retired"];
+
+const genders = ["Male", "Female"];
 
 export default function ProfileInfo({ navigation, onProfileComplete }) {
   const [user, setUser] = useState(null);
@@ -10,7 +33,6 @@ export default function ProfileInfo({ navigation, onProfileComplete }) {
   const [phone, setPhone] = useState("");
   const [education, setEducation] = useState("");
   const [gender, setGender] = useState("");
-  const [profilePhoto, setProfilePhoto] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:3000/me", { credentials: "include" })
@@ -28,9 +50,16 @@ export default function ProfileInfo({ navigation, onProfileComplete }) {
     return regex.test(date);
   };
 
+  
+
   const submittedUserDetails = async () => {
     if (!validateDate(dob)) {
       alert("Please enter the date in YYYY-MM-DD format");
+      return;
+    }
+
+    if (phone.length != 10) {
+      alert("inavlid phone number");
       return;
     }
 
@@ -40,51 +69,42 @@ export default function ProfileInfo({ navigation, onProfileComplete }) {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          city: city,
-          state: state,
-          country: country,
-          dob: dob,
-          phone: phone,
-          education: education,
-          gender: gender,
-          email: user.email
-        })
+          city,
+          state,
+          country,
+          dob,
+          phone,
+          education,
+          gender,
+          email: user?.email,
+        }),
       });
 
       const data = await response.json();
       if (!response.ok) {
-        alert(`Failed to save details for user ${data.message}`);
+        alert(`Failed to save details: ${data.message}`);
       }
       alert("User details saved successfully!");
       onProfileComplete();
     } catch (error) {
       console.error("Error saving user details:", error);
     }
-    
-  }
+  };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-      <ScrollView 
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-      >
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Text style={styles.headerText}>Profile Information</Text>
-        {renderInput("City", city, setCity)}
-        {renderInput("State", state, setState)}
-        {renderInput("Country", country, setCountry)}
+        
+        {renderDropdown("City", city, setCity, cities)}
+        {renderDropdown("State", state, setState, states)}
+        {renderDropdown("Country", country, setCountry, countries)}
         {renderInput("Date of Birth", dob, setDob)}
         {renderInput("Phone No (Optional)", phone, setPhone)}
-        {renderInput("Education", education, setEducation)}
-        {renderInput("Gender", gender, setGender)}
+        {renderDropdown("Education", education, setEducation, educations)}
+        {renderDropdown("Gender", gender, setGender, genders)}
 
-        <TouchableOpacity
-          style={styles.nextButton}
-          onPress={submittedUserDetails}
-        >
+        <TouchableOpacity style={styles.nextButton} onPress={submittedUserDetails}>
           <Text style={styles.nextButtonText}>Next</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -107,13 +127,29 @@ function renderInput(label, value, setter) {
   );
 }
 
+function renderDropdown(label, selectedValue, setter, options) {
+  return (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.pickerContainer}>
+        <Picker selectedValue={selectedValue} onValueChange={setter} style={styles.picker}>
+          <Picker.Item label={`Select ${label}`} value="" />
+          {options.map((option, index) => (
+            <Picker.Item key={index} label={option} value={option} />
+          ))}
+        </Picker>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     alignItems: "center",
     paddingVertical: 20,
     backgroundColor: "#ffdd99",
-    paddingTop: 20
+    paddingTop: 20,
   },
   headerText: {
     fontSize: 24,
@@ -137,6 +173,16 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderWidth: 1,
     borderColor: "#1a1100",
+    color: "#1a1100",
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#1a1100",
+    borderRadius: 8,
+    backgroundColor: "white",
+  },
+  picker: {
+    height: 50,
     color: "#1a1100",
   },
   nextButton: {

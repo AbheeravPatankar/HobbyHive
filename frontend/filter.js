@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { get_profiles } from "./serverInterface";
+import { useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -9,6 +10,7 @@ import {
   Modal,
   FlatList,
 } from "react-native";
+
 
 export default function FilterScreen() {
   // State variables for each filter
@@ -25,14 +27,31 @@ export default function FilterScreen() {
   const [options, setOptions] = useState([]);
 
   const filters = {
-    city: ["City 1", "City 2", "City 3"],
-    state: ["State 1", "State 2", "State 3"],
-    country: ["Country 1", "Country 2", "Country 3"],
+    city: [
+      "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", 
+      "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow", 
+      "Chandigarh", "Bhopal", "Indore", "Patna", "Surat", 
+      "Nagpur", "Coimbatore", "Kochi", "Guwahati", "Visakhapatnam"
+    ],
+    
+    state: [
+      "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
+      "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", 
+      "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", 
+      "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+      "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", 
+      "Uttar Pradesh", "Uttarakhand", "West Bengal"
+    ],
+    
+    country: ["USA", "Canada", "UK", "India", "Australia", "Switzerland"],
+    
+    education: ["High School", "Undergraduate", "Graduate", "Working", "Retired"],
+    
+    gender: ["Male", "Female"],
+    
     age: ["0-18", "19-35", "36-50", "51+"],
-    gender: ["Male", "Female", "Non-binary", "Prefer not to say"],
-    education: ["High School", "Undergraduate", "Graduate", "Doctorate"],
+
     followers: ["0-50", "51-100", "101-500", "501+"],
-    experience: ["0-2 years", "3-5 years", "6-10 years", "10+ years"],
   };
 
   function openModal(filterType, setter) {
@@ -40,8 +59,9 @@ export default function FilterScreen() {
     setCurrentSelection(() => setter);
     setModalVisible(true);
   }
+  const navigation = useNavigation();
 
-  function submitFilters() {
+  const submitFilters = async () => {
     const filterValues = {
       city: selectedCity,
       state: selectedState,
@@ -50,11 +70,28 @@ export default function FilterScreen() {
       gender: selectedGender,
       education: selectedEducation,
       followers: selectedFollowers,
-      experience: selectedExperience,
     };
 
     console.log("Selected Filters:", filterValues);
-    get_profiles(filterValues);
+
+    navigation.navigate("HomeDrawer", { screen: "HomeTabs", params: { screen:"Home", params: { filters: filterValues } }});
+
+  }
+
+  function renderFilter(label, selectedValue, setter) {
+    return (
+      <View style={styles.filterRow}>
+      <TouchableOpacity style={styles.filterBox} onPress={() => openModal(label.toLowerCase(), setter)}>
+        <Text style={styles.label}>{label}</Text>
+        <Text style={styles.selectedValue}>{selectedValue || "Select"}</Text>
+      </TouchableOpacity>
+      {selectedValue && (
+        <TouchableOpacity style={styles.clearButton} onPress={() => setter(null)}>
+          <Text style={styles.clearButtonText}>✖</Text>
+        </TouchableOpacity>
+      )}
+      </View>
+    );
   }
 
   return (
@@ -67,7 +104,6 @@ export default function FilterScreen() {
       {renderFilter("Gender", selectedGender, setSelectedGender)}
       {renderFilter("Education", selectedEducation, setSelectedEducation)}
       {renderFilter("Followers", selectedFollowers, setSelectedFollowers)}
-      {renderFilter("Experience", selectedExperience, setSelectedExperience)}
 
       <TouchableOpacity style={styles.applyButton} onPress={submitFilters}>
         <Text style={styles.applyButtonText}>Apply</Text>
@@ -96,15 +132,6 @@ export default function FilterScreen() {
       </Modal>
     </ScrollView>
   );
-
-  function renderFilter(label, selectedValue, setter) {
-    return (
-      <TouchableOpacity style={styles.filterBox} onPress={() => openModal(label.toLowerCase(), setter)}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.selectedValue}>{selectedValue || "Select"}</Text>
-      </TouchableOpacity>
-    );
-  }
 }
 
 const styles = StyleSheet.create({
@@ -172,5 +199,10 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     color: "#333",
+  },
+  filterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "85%",
   },
 });
