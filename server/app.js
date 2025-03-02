@@ -20,7 +20,7 @@ app.use(express.json());
 const sessionStore = new MySQLStore({
   host: "localhost",
   user: "root",
-  password: "OIL@28penmysql",
+  password: "YOUR PASSWORD",
   database: "hobbyhive",
 });
 
@@ -36,7 +36,7 @@ app.use(session({
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "OIL@28penmysql",
+  password: "YOUR PASSWORD",
   database: "hobbyhive"
 });
 
