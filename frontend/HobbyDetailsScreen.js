@@ -11,6 +11,34 @@ export default function HobbyDetailsScreen({ hobbies, onComplete }) {
     }));
   };
 
+  const handleHobbyDetails = async () => {
+    try {
+      for (const hobby of Object.keys(hobbyDetails)) {
+        const response = await fetch("http://localhost:3000/saveHobbyDetails", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            hobby: hobby,
+            description: hobbyDetails[hobby].description || "",
+            experience: hobbyDetails[hobby].experience || "",
+          }),
+        });
+  
+        const data = await response.json();
+        if (!response.ok) {
+          alert(`Failed to save details for ${hobby}: ${data.message}`);
+        }
+      }
+      alert("All hobby details saved successfully!");
+      onComplete();
+    } catch (error) {
+      console.error("Error saving hobby details:", error);
+    }
+
+    onComplete();
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.innerContainer}>
@@ -28,17 +56,17 @@ export default function HobbyDetailsScreen({ hobbies, onComplete }) {
               style={styles.input}
               placeholder="Description"
               placeholderTextColor="#1a1100"
-              onChangeText={(text) => handleInputChange(hobby, "certifications", text)}
+              onChangeText={(text) => handleInputChange(hobby, "description", text)}
             />
             <TextInput
               style={styles.input}
               placeholder="Experience"
               placeholderTextColor="#1a1100"
-              onChangeText={(text) => handleInputChange(hobby, "about", text)}
+              onChangeText={(text) => handleInputChange(hobby, "experience", text)}
             />
           </View>
         ))}
-        <Button title="Next" onPress={onComplete} color="#1a1100" />
+        <Button title="Next" onPress={handleHobbyDetails} color="#1a1100" />
       </View>
     </ScrollView>
   );

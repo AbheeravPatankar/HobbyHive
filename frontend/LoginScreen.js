@@ -5,13 +5,42 @@ function LoginScreen({ onLoginSuccess, onGoToSignup }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
   // LOGIC FOR HANDLING LOGIN
-  const handleLogin = () => {
-    if (email === "yo" && password === "123") {
-      onLoginSuccess(); // Move to HomeScreen
-    } else {
-      alert("Invalid credentials");
+  const handleLogin = async () => {
+
+    if (!validateEmail(email)) {
+      alert("invalid email.");
+      return;
+    } 
+    if (password.length < 6) {
+      alert("password too short.");
+      return;
     }
+
+    try {
+    const response = await fetch("http://localhost:3000/login", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    })
+    
+    const data = await response.json();
+    if (response.ok) {
+      alert("logged in successfully");
+      onLoginSuccess();
+    } else {
+      alert(data.err);
+    }
+  } catch (err) {
+    alert("login failed");
+  }
+
   };
 
   return (
