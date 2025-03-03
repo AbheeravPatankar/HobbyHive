@@ -4,7 +4,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-
 import HomeScreen from "./HomeScreen";
 import LoginScreen from "./LoginScreen";
 import SignupScreen from "./SignupScreen";
@@ -13,6 +12,7 @@ import ProfileInfo from "./ProfileInfo";
 import HobbyDetailsScreen from "./HobbyDetailsScreen";
 import FilterScreen from "./filter";
 import HobbyRiskSurveyScreen from "./HobbyRiskSurveyScreen";
+import ProfileDetail from "./ProfileDetail";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -53,7 +53,7 @@ export default function App() {
                   {...props}
                   onLoginSuccess={() => {
                     setIsLoggedIn(true);
-                    props.navigation.replace("HomeDrawer"); 
+                    props.navigation.replace("HomeDrawer");
                   }}
                   onGoToSignup={() => props.navigation.navigate("Signup")}
                 />
@@ -63,7 +63,9 @@ export default function App() {
               {(props) => (
                 <SignupScreen
                   {...props}
-                  onSignupSuccess={() => props.navigation.navigate("ProfileInfo")}
+                  onSignupSuccess={() =>
+                    props.navigation.navigate("ProfileInfo")
+                  }
                 />
               )}
             </Stack.Screen>
@@ -71,7 +73,9 @@ export default function App() {
               {(props) => (
                 <ProfileInfo
                   {...props}
-                  onProfileComplete={() => props.navigation.navigate("HobbyScreen")}
+                  onProfileComplete={() =>
+                    props.navigation.navigate("HobbyScreen")
+                  }
                 />
               )}
             </Stack.Screen>
@@ -92,7 +96,8 @@ export default function App() {
                   hobbies={props.route.params?.hobbies || []}
                   onComplete={() => {
                     setIsLoggedIn(true);
-                    props.navigation.replace("HomeDrawer"); e
+                    props.navigation.replace("HomeDrawer");
+                    e;
                   }}
                 />
               )}
@@ -100,6 +105,7 @@ export default function App() {
           </>
         ) : null}
         <Stack.Screen name="HomeDrawer" component={HomeDrawer} />
+        <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
       </Stack.Navigator>
     </NavigationContainer>
   );

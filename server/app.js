@@ -187,7 +187,7 @@ app.post("/saveHobbyDetails", (req, res) => {
 });
 
 app.get("/profiles", (req, res) => {
-  const query = "SELECT id, name, followers, city, state, country, age_group, education, gender FROM users";
+  const query = "SELECT id, name, followers, city, state, country, gender,dob ,email FROM users";
 
   db.query(query, (err, results) => {
     if (err) {
