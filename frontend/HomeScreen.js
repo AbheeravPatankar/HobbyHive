@@ -1,5 +1,7 @@
 import { DrawerActions, NavigationContainer } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+
 import {
   StyleSheet,
   Text,
@@ -13,15 +15,33 @@ import {
 
 import Icon from "react-native-vector-icons/FontAwesome";
 
-function HomeScreen({ navigation, route }) {
+function HomeScreen({ navigation, route, setIsLoggedIn }) {
+  const [email, setEmail] = useState(null);
   const [hobbySeekers, setHobbySeekers] = useState([]);
   const [filteredSeekers, setFilteredSeekers] = useState([]);
 
   useEffect(() => {
+    const getEmail = async () => {
+      fetch("http://localhost:3000/me", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setEmail(data.user);
+        }
+      })
+      .catch(err => console.log(err));
+    }
+
     // Fetch profiles when component mounts
     const fetchProfiles = async () => {
+      getEmail();
       try {
-        const response = await fetch("http://localhost:3000/profiles");
+        const response = await fetch("http://localhost:3000/profiles", {
+          method: "POST",
+          credentials: "include",
+          headers:{ "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email }),
+        });
         const text = await response.text(); // Get raw response
         console.log("Raw response:", text);
 
@@ -55,9 +75,19 @@ function HomeScreen({ navigation, route }) {
 
       setFilteredSeekers(filtered);
     } else {
-      setFilteredSeekers(hobbySeekers); // If no filters, show all
+      setFilteredSeekers(hobbySeekers); 
     }
   }, [route.params, hobbySeekers]);
+
+  const handleLogout = async () => {
+    setIsLoggedIn(false); 
+    try {
+      await AsyncStorage.removeItem("isLoggedIn"); 
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+  
 
   const cardHeight = 100;
   const cardWidth = Dimensions.get("window").width * 0.9;
@@ -108,24 +138,12 @@ function HomeScreen({ navigation, route }) {
           >
             <Icon name="filter" size={20} color="#1a1100" />
           </TouchableOpacity>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Icon name="sign-out" size={20} color="#1a1100" />
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.bigText}>No Such Users</Text>
-
-        <View style={styles.bottomTabPanel}>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>Tab 1</Text>
-          </View>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>Tab 2</Text>
-          </View>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>Tab 3</Text>
-          </View>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>Tab 4</Text>
-          </View>
-        </View>
       </SafeAreaView>
     );
   }
@@ -140,6 +158,9 @@ function HomeScreen({ navigation, route }) {
         >
           <Icon name="filter" size={20} color="#1a1100" />
         </TouchableOpacity>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Icon name="sign-out" size={20} color="#1a1100" />
+          </TouchableOpacity>
       </View>
 
       <FlatList
@@ -251,6 +272,16 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "bold",
   },
+  logoutButton: { 
+    marginLeft: 10, 
+    backgroundColor: "#ffdd99", 
+    padding: 10, 
+    borderRadius: 50, 
+    justifyContent: "center", 
+    alignItems: "center", 
+    borderWidth: 2, 
+    borderColor: "#1a1100" },
+
 });
 
 export default HomeScreen;

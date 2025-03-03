@@ -19,9 +19,9 @@ app.use(express.json());
 
 const db = mysql.createPool({
   host: "localhost",
-  user: "hobby-hive",
-  password: "hobby",
-  database: "hobby_hive",
+  user: "root",
+  password: "OIL@28penmysql",
+  database: "hobbyhive",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -68,6 +68,7 @@ app.post("/login", (req, res) => {
     
 
     req.session.user = {email:  email};
+    req.session.save();
     return res.status(200).json({message: "invalid login"})
   })
 })
@@ -186,10 +187,22 @@ app.post("/saveHobbyDetails", (req, res) => {
 
 });
 
-app.get("/profiles", (req, res) => {
-  const query = "SELECT id, name, followers, city, state, country, gender,dob ,email FROM users";
+app.post("/profiles", (req, res) => {
+  const email  = req.session.user.email;
 
-  db.query(query, (err, results) => {
+  const query = `
+    SELECT u.id, u.name, u.followers, u.city, u.state, u.country, 
+                    u.gender, u.dob, u.email, u.current_status, u.age_group
+    FROM users u
+    JOIN user_hobbies h1 ON u.email = h1.email
+    WHERE h1.hobby IN (
+        SELECT h2.hobby FROM user_hobbies h2 WHERE h2.email = ?
+    ) 
+    AND u.email <> ?;
+  `;
+
+
+  db.query(query, [email, email], (err, results) => {
     if (err) {
       console.error("Error fetching profiles:", err);
       return res.status(500).json({ error: "Database error" });
@@ -223,6 +236,32 @@ app.post("/gethobbyrisk", (req, res) => {
     res.json(results);
   })
 })
+
+app.post("/userhobby", (req, res) => {
+  const { email } = req.body;
+
+  const query = "SELECT hobby, experience, description FROM user_hobbies WHERE email = ?";
+  db.query(query, [email], (err, results) => {
+    if (err) {
+      console.error("Error fetching hobbies: ", err);
+      return res.status(500).json({error: "database error"});
+    }
+
+    console.log(results);
+    res.json(results);
+  })
+})
+
+app.post("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Logout error:", err);
+      return res.status(500).json({ message: "Logout failed" });
+    }
+    res.clearCookie("connect.sid"); // Default session cookie name
+    res.json({ message: "Logged out successfully" });
+  });
+});
 
 app.listen(3000, ()=> {
   console.log("Server listening on port 3000");
