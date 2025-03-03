@@ -20,7 +20,7 @@ app.use(express.json());
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "OIL@28penmysql",
+  password: "YOUR PASSWORD",
   database: "hobbyhive",
   waitForConnections: true,
   connectionLimit: 10,
